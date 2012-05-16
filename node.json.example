@@ -1,0 +1,12 @@
+{ 
+  "user": {
+    "name": "deployer",
+    "password": "shadow of a password"
+  },
+  "postgresql": {
+    "password": {
+      "postgres": "shadow of a password"
+    }
+  },
+  "run_list": ["recipe[main]"]
+}
