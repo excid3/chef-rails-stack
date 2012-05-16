@@ -1,5 +1,5 @@
 # PRE CHEF
-# curl -Lo- https://raw.github.com/gist/2709199/7f39ab152eef15d90800e758b9fa874a9ec85304/gistfile1.sh | bash
+# curl -Lo- https://raw.github.com/gist/2709199/c47571f2b33a8f49a9bc2714cc6ec9420c976ef5/gistfile1.sh | bash
 
 package 'git-core'
 package 'bash'
