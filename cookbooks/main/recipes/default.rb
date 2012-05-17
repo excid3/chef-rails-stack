@@ -1,6 +1,3 @@
-# PRE CHEF
-# curl -Lo- https://raw.github.com/gist/2709199/1119ddedac87aac2870b3f440100563ba21727a2/gistfile1.sh | bash
-
 package 'git-core'
 
 user node[:user][:name] do

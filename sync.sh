@@ -1,1 +1,1 @@
-rsync -r . root@50.116.58.20:/var/chef
+rsync -r . root@auctionful-staging.com:/var/chef
