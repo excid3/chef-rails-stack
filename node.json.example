@@ -1,12 +1,30 @@
 { 
   "user": {
     "name": "deployer",
-    "password": "shadow of a password"
+    "password": "shadow-password"
   },
+
   "postgresql": {
     "password": {
-      "postgres": "shadow of a password"
+      "postgres": "shadow-password"
     }
   },
+  
+  "rvm": {
+    "user_installs": {
+      "user"           : "deployer",
+      "upgrade"        : "head",
+      "default_ruby"   : "ruby-1.9.3-p194",
+      "global_gems": [
+        { 
+          "name": "bundler",
+          "version": "1.2.pre"
+        }
+       ]
+      }
+    }
+
+  },
+
   "run_list": ["recipe[main]"]
 }

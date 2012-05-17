@@ -1,12 +1,7 @@
 # PRE CHEF
-# curl -Lo- https://raw.github.com/gist/2709199/c47571f2b33a8f49a9bc2714cc6ec9420c976ef5/gistfile1.sh | bash
+# curl -Lo- https://raw.github.com/gist/2709199/1119ddedac87aac2870b3f440100563ba21727a2/gistfile1.sh | bash
 
 package 'git-core'
-package 'bash'
-
-include_recipe "nginx::source"
-include_recipe "postgresql::server"
-include_recipe "postgresql::client"
 
 user node[:user][:name] do
   password node[:user][:password]
@@ -15,3 +10,9 @@ user node[:user][:name] do
   supports manage_home: true
   shell "/bin/bash"
 end
+
+include_recipe "rvm::user"
+
+include_recipe "nginx::source"
+include_recipe "postgresql::server"
+include_recipe "postgresql::client"
