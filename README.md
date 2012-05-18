@@ -1,8 +1,6 @@
 **Stack**
 
-Linode - Ubuntu 12.04 LTS
-
-This sets up 
+Chef solo recipes for `Linode - Ubuntu 12.04 LTS` that sets up
 
 - Nginx
 - Unicorn
