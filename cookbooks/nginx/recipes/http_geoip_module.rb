@@ -4,7 +4,7 @@
 #
 # Author:: Jamie Winsor (<jamie@vialstudios.com>)
 #
-# Copyright 2012, Riot Games
+# Copyright 2011, Vial Studios, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,85 +19,58 @@
 # limitations under the License.
 #
 
-country_dat          = "#{node[:nginx][:geoip][:path]}/GeoIP.dat"
-country_src_filename = ::File.basename(node[:nginx][:geoip][:country_dat_url])
-country_src_filepath = "#{Chef::Config[:file_cache_path]}/#{country_src_filename}"
-city_dat             = nil
-city_src_filename    = ::File.basename(node[:nginx][:geoip][:city_dat_url])
-city_src_filepath    = "#{Chef::Config[:file_cache_path]}/#{city_src_filename}"
-geolib_filename      = ::File.basename(node[:nginx][:geoip][:lib_url])
-geolib_filepath      = "#{Chef::Config[:file_cache_path]}/#{geolib_filename}"
+node.set[:nginx][:configure_flags] = 
+  node[:nginx][:configure_flags] | ["--with-http_geoip_module"]
 
-remote_file geolib_filepath do
-  source node[:nginx][:geoip][:lib_url]
-  checksum node[:nginx][:geoip][:lib_checksum]
-  owner "root"
-  group "root"
-  mode 0644
-end
+geoip_path = "/srv/geoip"
+node.default[:nginx][:geoip][:country_dat] = country_dat = "#{geoip_path}/GeoIP.dat"
+node.default[:nginx][:geoip][:city_dat] = city_dat = "#{geoip_path}/GeoLiteCity.dat"
 
-bash "extract_geolib" do
-  cwd ::File.dirname(geolib_filepath)
-  code <<-EOH
-    tar xzvf #{geolib_filepath} -C #{::File.dirname(geolib_filepath)}
-    cd GeoIP-#{node[:nginx][:geoip][:lib_version]} && ./configure
-    make && make install
-  EOH
+node.default[:nginx][:geoip][:enable_city] = false
 
-  creates "/usr/local/lib/libGeoIP.so.#{node[:nginx][:geoip][:lib_version]}"
-  subscribes :run, resources(:remote_file => geolib_filepath)
-end
+package "libgeoip-dev"
 
-directory "#{node[:nginx][:geoip][:path]}" do
+directory "#{geoip_path}" do
   owner "root"
   group "root"
   mode 0755
 end
 
-remote_file country_src_filepath do
-  source node[:nginx][:geoip][:country_dat_url]
-  checksum node[:nginx][:geoip][:country_dat_checksum]
+remote_file "#{geoip_path}/GeoLiteCity.dat.gz" do
+  source "http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz"
   owner "root"
   group "root"
   mode 0644
+  action :create_if_missing
+end
+
+remote_file "#{geoip_path}/GeoIP.dat.gz" do
+  source "http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz"
+  owner "root"
+  group "root"
+  mode 0644
+  action :create_if_missing
+end
+
+bash "gunzip_geo_lite_city_dat" do
+  cwd "#{geoip_path}"
+  code <<-EOH
+    gunzip -c GeoLiteCity.dat.gz > #{File.basename(city_dat)}
+  EOH
+  creates city_dat
 end
 
 bash "gunzip_geo_lite_country_dat" do
+  cwd "#{geoip_path}"
   code <<-EOH
-    gunzip -c #{country_src_filepath} > #{country_dat}
+    gunzip -c GeoIP.dat.gz > #{File.basename(country_dat)}
   EOH
   creates country_dat
 end
 
-if node[:nginx][:geoip][:enable_city]
-  city_dat  = "#{node[:nginx][:geoip][:path]}/GeoLiteCity.dat"
-
-  remote_file city_src_filepath do
-    source node[:nginx][:geoip][:city_dat_url]
-    checksum node[:nginx][:geoip][:city_dat_checksum]
-    owner "root"
-    group "root"
-    mode 0644
-  end
-
-  bash "gunzip_geo_lite_city_dat" do
-    code <<-EOH
-      gunzip -c #{city_src_filepath} > #{city_dat}
-    EOH
-    creates city_dat
-  end
-end
-
 template "#{node[:nginx][:dir]}/conf.d/http_geoip.conf" do
-  source "modules/http_geoip.conf.erb"
+  source "http_geoip.conf.erb"
   owner "root"
   group "root"
   mode "0644"
-  variables(
-    :country_dat => country_dat,
-    :city_dat => city_dat
-  )
 end
-
-node.run_state[:nginx_configure_flags] =
-  node.run_state[:nginx_configure_flags] | ["--with-http_geoip_module", "--with-ld-opt='-Wl,-R,/usr/local/lib -L /usr/local/lib'"]

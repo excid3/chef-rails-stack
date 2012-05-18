@@ -15,5 +15,6 @@ end
    nginx::rails_unicorn
    postgresql::server
    postgresql::client
-   logrotate).
+   logrotate
+   sudo).
    each {|recipe| include_recipe recipe}

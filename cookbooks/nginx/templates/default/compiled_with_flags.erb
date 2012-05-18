@@ -1,0 +1,5 @@
+# Generated automatically by Chef
+# Removing or modifying this file will cause NGINX to recompile during the next Chef run.
+<% node[:nginx][:configure_flags].each do |flag| %>
+<%= flag %>
+<% end %>

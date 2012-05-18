@@ -1,10 +1,8 @@
 #
-# Cookbook Name:: nginx
-# Attributes:: upload_progress
+# Cookbook Name:: sudo
+# Recipe:: default
 #
-# Author:: Jamie Winsor (<jamie@vialstudios.com>)
-#
-# Copyright 2012, Riot Games
+# Copyright 2008-2011, Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,5 +17,18 @@
 # limitations under the License.
 #
 
-default[:nginx][:upload_progress][:url]      = "https://github.com/masterzen/nginx-upload-progress-module/tarball/v0.8.4"
-default[:nginx][:upload_progress][:checksum] = "9a6acb984d81f5d7e04214d63ae94273"
+package "sudo" do
+  action :upgrade
+end
+
+template "/etc/sudoers" do
+  source "sudoers.erb"
+  mode 0440
+  owner "root"
+  group "root"
+  variables(
+    :sudoers_groups => node['authorization']['sudo']['groups'],
+    :sudoers_users => node['authorization']['sudo']['users'],
+    :passwordless => node['authorization']['sudo']['passwordless']
+  )
+end

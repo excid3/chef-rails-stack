@@ -1,0 +1,4 @@
+geoip_country <%= node[:nginx][:geoip][:country_dat] %>;
+<% if node[:nginx][:geoip][:enable_city] -%>
+geoip_city <%= node[:nginx][:geoip][:city_dat] %>;
+<% end -%>

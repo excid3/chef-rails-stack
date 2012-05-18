@@ -1,10 +1,8 @@
 #
-# Cookbook Name:: nginx
-# Recipe:: ohai_plugin
+# Cookbook Name:: sudo
+# Attribute File:: sudoers
 #
-# Author:: Jamie Winsor (<jamie@vialstudios.com>)
-#
-# Copyright 2012, Riot Games
+# Copyright 2008-2011, Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,17 +17,6 @@
 # limitations under the License.
 #
 
-include_recipe "ohai"
-
-template "#{node[:ohai][:plugin_path]}/nginx.rb" do
-  source 'plugins/nginx.rb.erb'
-  owner 'root'
-  group 'root'
-  mode 0755
-
-  variables(
-    :nginx_bin => node[:nginx][:binary]
-  )
-
-  notifies :reload, "ohai[custom_plugins]", :immediately
-end
+default['authorization']['sudo']['groups'] = Array.new 
+default['authorization']['sudo']['users'] = Array.new
+default['authorization']['sudo']['passwordless'] = false

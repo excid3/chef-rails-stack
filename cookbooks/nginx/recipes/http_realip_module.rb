@@ -1,10 +1,10 @@
 #
 # Cookbook Name:: nginx
-# Recipe:: http_realip_module
+# Recipe:: http_gzip_static_module
 #
 # Author:: Jamie Winsor (<jamie@vialstudios.com>)
 #
-# Copyright 2012, Riot Games
+# Copyright 2011, Vial Studios, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,27 +20,21 @@
 #
 
 # Documentation: http://wiki.nginx.org/HttpRealIpModule
+node.set[:nginx][:configure_flags] = 
+  node[:nginx][:configure_flags] | ["--with-http_realip_module"]
 
+node.default[:nginx][:realip][:addresses]       = ["127.0.0.1"]
 # Currently only accepts X-Forwarded-For or X-Real-IP
-node.default[:nginx][:realip][:header]    = "X-Forwarded-For"
-node.default[:nginx][:realip][:addresses] = ["127.0.0.1"]
+node.default[:nginx][:realip][:header]          = "X-Forwarded-For"
 
 service "nginx" do
-  supports :status => true, :restart => true, :reload => true
+  action :nothing
 end
 
 template "#{node[:nginx][:dir]}/conf.d/http_realip.conf" do
-  source "modules/http_realip.conf.erb"
+  source "http_realip.conf.erb"
   owner "root"
   group "root"
   mode "0644"
-  variables(
-    :addresses => node[:nginx][:realip][:addresses],
-    :header => node[:nginx][:realip][:header]
-  )
-
-  notifies :reload, resources(:service => "nginx")
+  notifies :restart, resources(:service => "nginx")
 end
-
-node.run_state[:nginx_configure_flags] =
-  node.run_state[:nginx_configure_flags] | ["--with-http_realip_module"]

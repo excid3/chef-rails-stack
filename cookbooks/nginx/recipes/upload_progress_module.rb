@@ -4,7 +4,7 @@
 #
 # Author:: Jamie Winsor (<jamie@vialstudios.com>)
 #
-# Copyright 2012, Riot Games
+# Copyright 2011, Vial Studios, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,29 +19,34 @@
 # limitations under the License.
 #
 
-upm_src_filename = ::File.basename(node[:nginx][:upload_progress][:url])
-upm_src_filepath = "#{Chef::Config[:file_cache_path]}/#{upm_src_filename}"
-upm_extract_path = "#{Chef::Config[:file_cache_path]}/nginx_upload_progress/#{node[:nginx][:upload_progress][:checksum]}"
-
-remote_file upm_src_filepath do
-  source node[:nginx][:upload_progress][:url]
-  checksum node[:nginx][:upload_progress][:checksum]
-  owner "root"
-  group "root"
-  mode 0644
+upload_progress_version = node.default[:nginx][:upload_progress_version] = "0.8.2"
+remote_file "#{Chef::Config[:file_cache_path]}/nginx-upload-progress-module-v#{upload_progress_version}.tar.gz" do
+  source "https://github.com/masterzen/nginx-upload-progress-module/tarball/v#{upload_progress_version}"
+  action :create_if_missing
 end
 
 bash "extract_upload_progress_module" do
-  cwd ::File.dirname(upm_src_filepath)
+  cwd "#{Chef::Config[:file_cache_path]}"
   code <<-EOH
-    mkdir -p #{upm_extract_path}
-    tar xzf #{upm_src_filename} -C #{upm_extract_path}
-    mv #{upm_extract_path}/*/* #{upm_extract_path}/
+    mkdir nginx-upload-progress-module-v#{upload_progress_version}
+    tar xzf nginx-upload-progress-module-v#{upload_progress_version}.tar.gz -C nginx-upload-progress-module-v#{upload_progress_version}
+    mv nginx-upload-progress-module-v#{upload_progress_version}/*/* nginx-upload-progress-module-v#{upload_progress_version}/
   EOH
-
-  not_if { ::File.exists?(upm_extract_path) }
+  not_if do File.exists?("#{Chef::Config[:file_cache_path]}/nginx-upload-progress-module-v#{upload_progress_version}") end
 end
 
-node.run_state[:nginx_configure_flags] =
-  node.run_state[:nginx_configure_flags] | ["--add-module=#{upm_extract_path}"]
+service "nginx" do
+  action :nothing
+end
+
+cookbook_file "#{node[:nginx][:dir]}/conf.d/upload_progress.conf" do
+  source "upload_progress.conf"
+  owner "root"
+  group "root"
+  mode 0644
+  notifies :restart, resources(:service => "nginx")
+end
+
+node.set[:nginx][:configure_flags] = 
+  node[:nginx][:configure_flags] | ["--add-module=#{Chef::Config[:file_cache_path]}/nginx-upload-progress-module-v#{upload_progress_version}"]
   
