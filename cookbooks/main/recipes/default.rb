@@ -10,6 +10,9 @@ end
 
 include_recipe "rvm::user"
 
-include_recipe "nginx::source"
-include_recipe "postgresql::server"
-include_recipe "postgresql::client"
+%w(nginx::source
+   nginx::rails_unicorn
+   postgresql::server
+   postgresql::client
+   logrotate).
+   each {|recipe| include_recipe recipe}
