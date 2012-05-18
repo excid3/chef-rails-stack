@@ -8,7 +8,9 @@ user node[:user][:name] do
   shell "/bin/bash"
 end
 
-%w(rvm::user
+%w(
+   ruby_build
+   rbenv::system
    nginx::source
    nginx::rails_unicorn
    postgresql::server

@@ -1,11 +1,13 @@
 **Stack**
 
+Linode - Ubuntu 12.04 LTS
+
 This sets up 
 
 - Nginx
 - Unicorn
 - Postgres
-- User level RVM with ruby-1.9.3
+- rbenv to manage rubies
 - Foreman for process management via Upstart
 
 **Usage**
