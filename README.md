@@ -2,9 +2,11 @@
 
 This sets up 
 
-- NGinx
-- PostGres
+- Nginx
+- Unicorn
+- Postgres
 - User level RVM with ruby-1.9.3
+- Foreman for process management via Upstart
 
 **Usage**
 
