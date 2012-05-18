@@ -6,7 +6,7 @@
 # Author:: Joshua Timberman (<joshua@opscode.com>)
 # Author:: Jamie Winsor (<jamie@vialstudios.com>)
 #
-# Copyright 2009-2011, Opscode, Inc.
+# Copyright 2009-2012, Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@
 # limitations under the License.
 #
 
+node.set[:nginx][:binary]          = "#{node[:nginx][:source][:prefix]}/sbin/nginx"
+node.set[:nginx][:daemon_disable]  = true
+
+include_recipe "nginx::ohai_plugin"
 include_recipe "build-essential"
 
-unless platform?("centos","redhat","fedora")
-  include_recipe "runit"
-end
-
+src_filepath  = "#{Chef::Config[:file_cache_path]}/nginx-#{node[:nginx][:version]}.tar.gz"
 packages = value_for_platform(
     ["centos","redhat","fedora"] => {'default' => ['pcre-devel', 'openssl-devel']},
     "default" => ['libpcre3', 'libpcre3-dev', 'libssl-dev']
@@ -34,6 +35,12 @@ packages = value_for_platform(
 
 packages.each do |devpkg|
   package devpkg
+end
+
+remote_file node[:nginx][:source][:url] do
+  source node[:nginx][:source][:url]
+  path src_filepath
+  backup false
 end
 
 directory node[:nginx][:log_dir] do
@@ -56,6 +63,100 @@ end
   end
 end
 
+node.run_state[:nginx_force_recompile] = false
+node.run_state[:nginx_configure_flags] = 
+  node[:nginx][:source][:default_configure_flags] | node[:nginx][:configure_flags]
+
+node[:nginx][:source][:modules].each do |ngx_module|
+  include_recipe "nginx::#{ngx_module}"
+end
+
+configure_flags = node.run_state[:nginx_configure_flags]
+nginx_force_recompile = node.run_state[:nginx_force_recompile]
+
+bash "compile_nginx_source" do
+  cwd ::File.dirname(src_filepath)
+  code <<-EOH
+    tar zxf #{::File.basename(src_filepath)} -C #{::File.dirname(src_filepath)}
+    cd nginx-#{node[:nginx][:version]} && ./configure #{node.run_state[:nginx_configure_flags].join(" ")}
+    make && make install
+  EOH
+  
+  not_if do
+    nginx_force_recompile == false &&
+      node.automatic_attrs[:nginx][:version] == node[:nginx][:version] &&
+      node.automatic_attrs[:nginx][:configure_arguments].sort == configure_flags.sort
+  end
+end
+
+node.run_state.delete(:nginx_configure_flags)
+node.run_state.delete(:nginx_force_recompile)
+
+case node[:nginx][:init_style]
+when "runit"
+  node.set[:nginx][:src_binary] = node[:nginx][:binary]
+  include_recipe "runit"
+
+  runit_service "nginx"
+
+  service "nginx" do
+    supports :status => true, :restart => true, :reload => true
+    reload_command "[[ -f #{node[:nginx][:pid]} ]] && kill -HUP `cat #{node[:nginx][:pid]}` || true"
+  end
+when "bluepill"
+  include_recipe "bluepill"
+
+  template "#{node['bluepill']['conf_dir']}/nginx.pill" do
+    source "nginx.pill.erb"
+    mode 0644
+    variables(
+      :working_dir => node[:nginx][:source][:prefix],
+      :src_binary => node[:nginx][:binary],
+      :nginx_dir => node[:nginx][:dir],
+      :log_dir => node[:nginx][:log_dir],
+      :pid => node[:nginx][:pid]
+    )
+  end
+
+  bluepill_service "nginx" do
+    action [ :enable, :load ]
+  end
+
+  service "nginx" do
+    supports :status => true, :restart => true, :reload => true
+    reload_command "[[ -f #{node[:nginx][:pid]} ]] && kill -HUP `cat #{node[:nginx][:pid]}` || true"
+    action :nothing
+  end
+else
+  node.set[:nginx][:daemon_disable] = false
+  
+  template "/etc/init.d/nginx" do
+    source "nginx.init.erb"
+    owner "root"
+    group "root"
+    mode "0755"
+    variables(
+      :working_dir => node[:nginx][:source][:prefix],
+      :src_binary => node[:nginx][:binary],
+      :nginx_dir => node[:nginx][:dir],
+      :log_dir => node[:nginx][:log_dir],
+      :pid => node[:nginx][:pid]
+    )
+  end
+
+  template "/etc/sysconfig/nginx" do
+    source "nginx.sysconfig.erb"
+    owner "root"
+    group "root"
+    mode "0644"
+  end
+
+  service "nginx" do
+    supports :status => true, :restart => true, :reload => true
+    action :enable
+  end
+end
+
 %w{nxensite nxdissite}.each do |nxscript|
   template "/usr/sbin/#{nxscript}" do
     source "#{nxscript}.erb"
@@ -65,92 +166,13 @@ end
   end
 end
 
-nginx_version = node[:nginx][:version]
-
-node.set[:nginx][:daemon_disable] = true
-
-node[:nginx][:modules].each do |modul|
-  include_recipe "nginx::#{modul}"
-end
-
-# Rebuild configure_flags attribute: The key here is throwing out the --prefix flag
-# which may exist from a previous run and may be incorrect if a previous version of
-# NGINX was installed.
-node.set[:nginx][:configure_flags] = node[:nginx][:configure_flags].reject { |flag| flag =~ /--prefix=.+/ } | 
-  [ "--prefix=#{node[:nginx][:install_path]}", "--conf-path=#{node[:nginx][:dir]}/nginx.conf" ]
-
-configure_flags = node[:nginx][:configure_flags].join(" ")
-
-remote_file "#{Chef::Config[:file_cache_path]}/nginx-#{nginx_version}.tar.gz" do
-  source "http://nginx.org/download/nginx-#{nginx_version}.tar.gz"
-  action :create_if_missing
-end
-
-unless platform?("centos","redhat","fedora")
-  runit_service "nginx"
-
-  service "nginx" do
-    action :nothing
-  end
-else
-  #install init db script
-  template "/etc/init.d/nginx" do
-    source "nginx.init.erb"
-    owner "root"
-    group "root"
-    mode "0755"
-  end
-
-  #install sysconfig file (not really needed but standard)
-  template "/etc/sysconfig/nginx" do
-    source "nginx.sysconfig.erb"
-    owner "root"
-    group "root"
-    mode "0644"
-  end
-
-  #register service
-  service "nginx" do
-    supports :status => true, :restart => true, :reload => true
-    action [:enable, :nothing]
-  end
-end
-
-file node[:nginx][:src_binary] do
-  action :nothing
-end
-
-# The compiled_with_flags file contains the list of flags which NGINX
-# was compiled with last. If this file changes, it means that the
-# desired flags have changed so the nginx binary is destroyed to force
-# the compile_nginx_source resource to run.
-template "#{Chef::Config[:file_cache_path]}/nginx-#{nginx_version}-compiled_with_flags" do
-  source "compiled_with_flags.erb"
-  owner "root"
-  group "root"
-  mode 0600
-  notifies :stop, "service[nginx]", :immediately
-  notifies :delete, resources(:file => node[:nginx][:src_binary]), :immediately
-end
-
-bash "compile_nginx_source" do
-  cwd "#{Chef::Config[:file_cache_path]}"
-  code <<-EOH
-    tar zxf nginx-#{nginx_version}.tar.gz
-    cd nginx-#{nginx_version} && ./configure #{configure_flags}
-    make && make install
-  EOH
-  creates node[:nginx][:src_binary]
-  notifies :restart, "service[nginx]"
-end
-
 template "nginx.conf" do
   path "#{node[:nginx][:dir]}/nginx.conf"
   source "nginx.conf.erb"
   owner "root"
   group "root"
   mode "0644"
-  notifies :restart, resources(:service => "nginx"), :immediately
+  notifies :reload, resources(:service => "nginx"), :immediately
 end
 
 cookbook_file "#{node[:nginx][:dir]}/mime.types" do
@@ -158,15 +180,9 @@ cookbook_file "#{node[:nginx][:dir]}/mime.types" do
   owner "root"
   group "root"
   mode "0644"
-  notifies :restart, resources(:service => "nginx"), :immediately
+  notifies :reload, resources(:service => "nginx"), :immediately
 end
 
-if platform?("ubuntu","debian")
-  template "/etc/logrotate.d/nginx" do
-    path "/etc/logrotate.d/nginx"
-    source "nginx_log_rotate.erb"
-    owner "root"
-    group "root"
-    mode "0644"
-  end
+service "nginx" do
+  action :start
 end
