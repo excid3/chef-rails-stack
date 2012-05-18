@@ -8,9 +8,8 @@ user node[:user][:name] do
   shell "/bin/bash"
 end
 
-include_recipe "rvm::user"
-
-%w(nginx::source
+%w(rvm::user
+   nginx::source
    nginx::rails_unicorn
    postgresql::server
    postgresql::client
