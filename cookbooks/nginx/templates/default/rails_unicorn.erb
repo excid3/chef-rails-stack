@@ -4,7 +4,7 @@ upstream <%= "#{@sitename}_unicorn" %> {
   # single worker for timing out).
 
   # for UNIX domain socket setups:
-  server unix:<%= @deploy_path >/<%= @sitename %>/shared/tmp/unicorn.socket fail_timeout=0;
+  server unix:/tmp/<%= @sitename %>.socket fail_timeout=0;
 }
 
 server {
@@ -21,6 +21,7 @@ server {
     server_name <%= @domains.join(' ') %>;
     access_log /var/log/nginx/<%= @sitename %>.log;
     rewrite_log on;
+
 
     root <%= @deploy_path %>/<%= @sitename %>/current/public;
     index        index.html index.htm;
