@@ -6,6 +6,12 @@
     "uid": 4000
   }],
   
+  "groups": [{
+    "name": "deploy",
+    "gid": "4000"
+   }
+  ],
+  
   "postgresql": {
     "password": {
       "postgres": "supersecret"
@@ -51,8 +57,8 @@
          "deploy_path":  "/home/deploy/apps/",
          "deploy_user":  "deploy",
          "deploy_group": "deploy",
-         "sitename":     "auctionful",
-         "domains":      ["www.auctionful-staging.com"]
+         "sitename":     "yoursite",
+         "domains":      ["www.yourserver.com"]
        }
      ]
    },

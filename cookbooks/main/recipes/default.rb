@@ -1,7 +1,9 @@
 package 'git-core'
 
-group "deployer" do
-  gid 4000
+node[:groups].each do |g|
+  group g[:name] do
+    gid g[:gid]
+  end
 end
 
 %w(
