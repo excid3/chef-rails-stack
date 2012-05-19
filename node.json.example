@@ -1,30 +1,61 @@
 { 
-  "user": {
-    "name": "deployer",
-    "password": "shadow-password"
-  },
-
+  "users": [{
+    "username": "deploy",
+    "password": "supersecret",
+    "gid": 4000,
+    "uid": 4000
+  }],
+  
   "postgresql": {
     "password": {
-      "postgres": "shadow-password"
+      "postgres": "supersecret"
     }
   },
   
-  "rvm": {
-    "user_installs": {
-      "user"           : "deployer",
-      "upgrade"        : "head",
-      "default_ruby"   : "ruby-1.9.3-p194",
-      "global_gems": [
-        { 
-          "name": "bundler",
-          "version": "1.2.pre"
-        }
-       ]
-      }
-    }
-
+  "rbenv": {
+    "rubies" : ["1.9.3-p194"]
   },
+
+   "nginx": {
+     "version": "1.0.6",
+     "install_path": "/usr/local/nginx-1.0.6",
+     "user": "deploy",
+     "modules": [
+       "http_stub_status_module",
+       "http_ssl_module",
+       "http_gzip_static_module"
+     ],
+     "gzip_types": [
+       "text/plain",
+       "text/html",
+       "text/css",
+       "text/xml",
+       "text/javascript",
+       "application/json",
+       "application/x-javascript",
+       "application/xml",
+       "application/xml+rss"
+     ]
+   },
+
+   "authorization": {
+    "sudo": {
+      "users": ["deploy"],
+      "passwordless": true
+    }
+   },
+
+   "rails_unicorn": {
+     "sites": [
+       {
+         "deploy_path":  "/home/deploy/apps/",
+         "deploy_user":  "deploy",
+         "deploy_group": "deploy",
+         "sitename":     "auctionful",
+         "domains":      ["www.auctionful-staging.com"]
+       }
+     ]
+   },
 
   "run_list": ["recipe[main]"]
 }
