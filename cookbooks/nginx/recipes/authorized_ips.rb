@@ -19,18 +19,23 @@
 # limitations under the License.
 #
 
-include_recipe "nginx::authorized_ips"
+node.default[:nginx][:remote_ip_var]  = "remote_addr"
+node.default[:nginx][:authorized_ips] = ["127.0.0.1/32"]
 
-template "nginx_status" do
-  path "#{node[:nginx][:dir]}/sites-available/nginx_status"
-  source "modules/nginx_status.erb"
+service "nginx" do
+  supports :status => true, :restart => true, :reload => true
+end
+
+template "authorized_ip" do
+  path "#{node[:nginx][:dir]}/authorized_ip"
+  source "modules/authorized_ip.erb"
   owner "root"
   group "root"
   mode "0644"
+  variables(
+    :remote_ip_var => node[:nginx][:remote_ip_var],
+    :authorized_ips => node[:nginx][:authorized_ips]
+  )
+
   notifies :reload, resources(:service => "nginx")
 end
-
-nginx_site "nginx_status"
-
-node.run_state[:nginx_configure_flags] =
-  node.run_state[:nginx_configure_flags] | ["--with-http_stub_status_module"]

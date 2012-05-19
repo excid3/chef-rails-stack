@@ -2,7 +2,7 @@ maintainer        "Opscode, Inc."
 maintainer_email  "cookbooks@opscode.com"
 license           "Apache 2.0"
 description       "Installs and configures nginx"
-version           "0.99.6"
+version           "0.101.1"
 
 recipe "nginx", "Installs nginx package and sets up configuration with Debian apache style with sites-enabled/sites-available"
 recipe "nginx::source", "Installs nginx from source and sets up configuration with Debian apache style with sites-enabled/sites-available"
@@ -11,9 +11,13 @@ recipe "nginx::source", "Installs nginx from source and sets up configuration wi
   supports os
 end
 
-%w{ build-essential runit }.each do |cb|
+%w{ build-essential runit bluepill }.each do |cb|
   depends cb
 end
+
+depends 'ohai', '~> 1.0.2'
+
+suggests 'yum'
 
 attribute "nginx/dir",
   :display_name => "Nginx Directory",
@@ -84,3 +88,6 @@ attribute "nginx/server_names_hash_bucket_size",
   :display_name => "Nginx Server Names Hash Bucket Size",
   :default => "64"
 
+attribute "nginx/disable_access_log",
+  :display_name => "Disable Access Log",
+  :default => "false"

@@ -1,14 +1,11 @@
 package 'git-core'
 
-user node[:user][:name] do
-  password node[:user][:password]
-  gid "admin"
-  home "/home/#{node[:user][:name]}"
-  supports manage_home: true
-  shell "/bin/bash"
+group "deployer" do
+  gid 4000
 end
 
 %w(
+   users
    ruby_build
    rbenv::system
    nginx::source

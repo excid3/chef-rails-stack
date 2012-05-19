@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: nginx
-# Recipe:: http_stub_status_module
+# Attributes:: upload_progress
 #
 # Author:: Jamie Winsor (<jamie@vialstudios.com>)
 #
@@ -19,18 +19,5 @@
 # limitations under the License.
 #
 
-include_recipe "nginx::authorized_ips"
-
-template "nginx_status" do
-  path "#{node[:nginx][:dir]}/sites-available/nginx_status"
-  source "modules/nginx_status.erb"
-  owner "root"
-  group "root"
-  mode "0644"
-  notifies :reload, resources(:service => "nginx")
-end
-
-nginx_site "nginx_status"
-
-node.run_state[:nginx_configure_flags] =
-  node.run_state[:nginx_configure_flags] | ["--with-http_stub_status_module"]
+default[:nginx][:upload_progress][:url]      = "https://github.com/masterzen/nginx-upload-progress-module/tarball/v0.8.4"
+default[:nginx][:upload_progress][:checksum] = "9a6acb984d81f5d7e04214d63ae94273"

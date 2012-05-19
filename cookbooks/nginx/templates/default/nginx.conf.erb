@@ -5,7 +5,7 @@ daemon off;
 <% end -%>
 
 error_log  <%= node[:nginx][:log_dir] %>/error.log;
-pid        /var/run/nginx.pid;
+pid        <%= node[:nginx][:pid] %>;
 
 events {
   worker_connections  <%= node[:nginx][:worker_connections] %>;
@@ -15,11 +15,9 @@ http {
   include       <%= node[:nginx][:dir] %>/mime.types;
   default_type  application/octet-stream;
 
-  log_format main '$remote_addr - $remote_user [$time_local] '
-                      '"$request" $status $body_bytes_sent "$http_referer" '
-                      '"$http_user_agent"';
-
-  access_log  <%= node[:nginx][:log_dir] %>/access.log;
+  <% unless node[:nginx][:disable_access_log] -%>
+  access_log	<%= node[:nginx][:log_dir] %>/access.log;
+  <% end %>
 
   sendfile on;
   tcp_nopush on;
@@ -34,14 +32,10 @@ http {
   gzip_http_version <%= node[:nginx][:gzip_http_version] %>;
   gzip_comp_level <%= node[:nginx][:gzip_comp_level] %>;
   gzip_proxied <%= node[:nginx][:gzip_proxied] %>;
-  gzip_min_length  1000;
-  gzip_disable     "MSIE [1-6]\."
   gzip_types <%= node[:nginx][:gzip_types].join(' ') %>;
   <% end %>
 
   server_names_hash_bucket_size <%= node[:nginx][:server_names_hash_bucket_size] %>;
-
-  server_tokens <%= node[:nginx][:server_tokens] %>;
 
   include <%= node[:nginx][:dir] %>/conf.d/*.conf;
   include <%= node[:nginx][:dir] %>/sites-enabled/*;

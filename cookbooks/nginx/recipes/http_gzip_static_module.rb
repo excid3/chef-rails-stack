@@ -4,7 +4,7 @@
 #
 # Author:: Jamie Winsor (<jamie@vialstudios.com>)
 #
-# Copyright 2011, Vial Studios, Inc.
+# Copyright 2012, Riot Games
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,5 @@
 # limitations under the License.
 #
 
-node.set[:nginx][:configure_flags] = 
-  node[:nginx][:configure_flags] | ["--with-http_gzip_static_module"]
-  
+node.run_state[:nginx_configure_flags] =
+  node.run_state[:nginx_configure_flags] | ["--with-http_gzip_static_module"]

@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: nginx
-# Recipe:: http_stub_status_module
+# Attributes:: source
 #
 # Author:: Jamie Winsor (<jamie@vialstudios.com>)
 #
@@ -19,18 +19,12 @@
 # limitations under the License.
 #
 
-include_recipe "nginx::authorized_ips"
-
-template "nginx_status" do
-  path "#{node[:nginx][:dir]}/sites-available/nginx_status"
-  source "modules/nginx_status.erb"
-  owner "root"
-  group "root"
-  mode "0644"
-  notifies :reload, resources(:service => "nginx")
-end
-
-nginx_site "nginx_status"
-
-node.run_state[:nginx_configure_flags] =
-  node.run_state[:nginx_configure_flags] | ["--with-http_stub_status_module"]
+default[:nginx][:source][:prefix]                  = nil
+default[:nginx][:source][:conf_path]               = nil
+default[:nginx][:source][:default_configure_flags] = nil
+default[:nginx][:configure_flags]  = Array.new
+default[:nginx][:source][:url]     = nil
+default[:nginx][:source][:modules] = [
+  "http_ssl_module",
+  "http_gzip_static_module"
+]
