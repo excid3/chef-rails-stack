@@ -1,1 +1,1 @@
-ssh root@app.auctionful-staging.com "chef-solo -c /var/chef/solo.rb"
+ssh root@root@yourserver.com "chef-solo -c /var/chef/solo.rb"
