@@ -1,1 +1,1 @@
-rsync -r . root@auctionful-staging.com:/var/chef
+rsync -r . root@app.auctionful-staging.com:/var/chef

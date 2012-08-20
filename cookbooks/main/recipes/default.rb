@@ -7,6 +7,7 @@ node[:groups].each do |g|
 end
 
 %w(
+   ruby-shadow
    users
    ruby_build
    rbenv::system
@@ -15,5 +16,6 @@ end
    postgresql::server
    postgresql::client
    logrotate
-   sudo).
+   sudo
+   revealcloud).
    each {|recipe| include_recipe recipe}

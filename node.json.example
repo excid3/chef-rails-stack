@@ -63,5 +63,9 @@
      ]
    },
 
+   "copperegg": {
+      "apikey": "FOOBARBRAZ"
+   },
+
   "run_list": ["recipe[main]"]
 }
