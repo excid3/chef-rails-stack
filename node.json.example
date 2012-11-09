@@ -1,71 +1,71 @@
-{ 
+{
   "users": [{
     "username": "deploy",
     "password": "supersecret",
     "gid": 4000,
     "uid": 4000
   }],
-  
+
   "groups": [{
     "name": "deploy",
     "gid": 4000
-   }
-  ],
-  
+  }],
+
   "postgresql": {
     "password": {
       "postgres": "supersecret"
     }
   },
-  
+
   "rbenv": {
-    "rubies" : ["1.9.3-p194"]
+    "rubies": ["1.9.3-p286"],
+    "global": "1.9.3-p286",
+    "gems": {
+      "1.9.3-p286": [
+        {"name": "bundler"}
+      ]
+    }
   },
 
-   "nginx": {
-     "version": "1.0.6",
-     "install_path": "/usr/local/nginx-1.0.6",
-     "user": "deploy",
-     "modules": [
-       "http_stub_status_module",
-       "http_ssl_module",
-       "http_gzip_static_module"
-     ],
-     "gzip_types": [
-       "text/plain",
-       "text/html",
-       "text/css",
-       "text/xml",
-       "text/javascript",
-       "application/json",
-       "application/x-javascript",
-       "application/xml",
-       "application/xml+rss"
-     ]
-   },
+  "nginx": {
+    "version": "1.2.4",
+    "install_path": "/usr/local/nginx-1.2.4",
+    "user": "deploy",
+    "modules": [
+      "http_stub_status_module",
+      "http_ssl_module",
+      "http_gzip_static_module"
+    ],
+    "gzip_types": [
+      "text/plain",
+      "text/html",
+      "text/css",
+      "text/xml",
+      "text/javascript",
+      "application/json",
+      "application/x-javascript",
+      "application/xml",
+      "application/xml+rss"
+    ]
+  },
 
-   "authorization": {
+  "authorization": {
     "sudo": {
       "users": ["deploy"],
       "passwordless": true
     }
-   },
+  },
 
-   "rails_unicorn": {
-     "sites": [
-       {
-         "deploy_path":  "/home/deploy/apps/",
-         "deploy_user":  "deploy",
-         "deploy_group": "deploy",
-         "sitename":     "yoursite",
-         "domains":      ["www.yourserver.com"]
-       }
-     ]
-   },
-
-   "copperegg": {
-      "apikey": "FOOBARBRAZ"
-   },
+  "rails_unicorn": {
+    "sites": [{
+      "deploy_path":  "/home/deploy/apps/",
+      "deploy_user":  "deploy",
+      "deploy_group": "deploy",
+      "sitename":     "yoursite",
+      "domains":      ["www.yourserver.com"]
+    }]
+  },
 
   "run_list": ["recipe[main]"]
 }
+
