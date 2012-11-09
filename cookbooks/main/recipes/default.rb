@@ -17,5 +17,5 @@ end
    postgresql::client
    logrotate
    sudo
-   revealcloud).
+   ).
    each {|recipe| include_recipe recipe}
