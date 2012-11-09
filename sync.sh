@@ -1,1 +1,1 @@
-rsync -r . root@yourserver.com:/var/chef
+rsync -r . root@$1:/var/chef --progress
