@@ -64,10 +64,10 @@ postgresql_conf_source = begin
   end
 end
 
-bash "Initialize configuration" do
-  user "root"
-  code "pg_createcluster 9.1 main --start"
-end
+#bash "Initialize configuration" do
+#  user "root"
+#  code "pg_createcluster 9.1 main --start"
+#end
 
 template "#{node[:postgresql][:dir]}/postgresql.conf" do
   source postgresql_conf_source
