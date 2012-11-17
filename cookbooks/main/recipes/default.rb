@@ -9,6 +9,7 @@ end
 %w(
    ruby-shadow
    users
+   sudo
    ruby_build
    rbenv::system
    nginx::passenger
@@ -16,6 +17,5 @@ end
    postgresql::server
    postgresql::client
    logrotate
-   sudo
    ).
    each {|recipe| include_recipe recipe}

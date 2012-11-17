@@ -60,11 +60,11 @@ remote_file nginx_url do
   backup false
 end
 
-user node['nginx']['user'] do
-  system true
-  shell "/bin/false"
-  home "/var/www"
-end
+#user node['nginx']['user'] do
+#  system true
+#  shell "/bin/false"
+#  home "/var/www"
+#end
 
 node.run_state['nginx_force_recompile'] = false
 node.run_state['nginx_configure_flags'] =

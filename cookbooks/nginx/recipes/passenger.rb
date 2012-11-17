@@ -37,6 +37,20 @@ service "nginx" do
   supports :status => true, :restart => true, :reload => true
 end
 
+directory node['nginx']['dir'] do
+  owner "root"
+  group "root"
+  mode "0755"
+end
+
+%w(sites-available sites-enabled conf.d).each do |leaf|
+  directory File.join(node['nginx']['dir'], leaf) do
+    owner "root"
+    group "root"
+    mode "0755"
+  end
+end
+
 template "#{node["nginx"]["dir"]}/conf.d/passenger.conf" do
   source "modules/passenger.conf.erb"
   owner "root"

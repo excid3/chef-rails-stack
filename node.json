@@ -1,21 +1,21 @@
 {
   "users": [{
     "username": "deploy",
-    "password": "supersecret",
+    "password": "supersecret", // EDIT THIS
     "gid": 4000,
     "uid": 4000
   }],
+
+  "postgresql": {
+    "password": {
+      "postgres": "supersecret" // EDIT THIS
+    }
+  },
 
   "groups": [{
     "name": "deploy",
     "gid": 4000
   }],
-
-  "postgresql": {
-    "password": {
-      "postgres": "supersecret"
-    }
-  },
 
   "rbenv": {
     "rubies": ["1.9.3-p286"],
@@ -60,16 +60,6 @@
       "users": ["deploy"],
       "passwordless": true
     }
-  },
-
-  "rails_unicorn": {
-    "sites": [{
-      "deploy_path":  "/home/deploy/apps/",
-      "deploy_user":  "deploy",
-      "deploy_group": "deploy",
-      "sitename":     "yoursite",
-      "domains":      ["www.yourserver.com"]
-    }]
   },
 
   "run_list": ["recipe[main]"]
