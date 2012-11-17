@@ -11,8 +11,8 @@ end
    users
    ruby_build
    rbenv::system
+   nginx::passenger
    nginx::source
-   nginx::rails_unicorn
    postgresql::server
    postgresql::client
    logrotate
