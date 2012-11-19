@@ -37,7 +37,16 @@
       "http_gzip_static_module"
     ],
     "passenger": {
-      "version": "3.0.18"
+      "version": "3.0.18",
+      "sites": [
+        {
+          "deploy_path": "/home/deploy/",
+          "deploy_user": "deploy",
+          "deploy_group": "deploy",
+          "sitename": "yoursite",
+          "domains": ["yoursite.com", "www.yoursite.com"]
+        }
+      ]
     },
     "configure_flags": [
       "--add-module=/var/lib/gems/1.9.1/gems/passenger-3.0.18/ext/nginx"

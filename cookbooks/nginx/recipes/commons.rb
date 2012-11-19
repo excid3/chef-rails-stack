@@ -62,6 +62,12 @@ template "#{node['nginx']['dir']}/sites-available/default" do
   mode 0644
 end
 
-nginx_site 'default' do
-  enable node['nginx']['default_site_enabled']
+#nginx_site 'default' do
+#  enable node['nginx']['default_site_enabled']
+#end
+
+node[:nginx][:passenger][:sites].each do |site|
+  nginx_site site[:sitename] do
+    enable site[:sitename]
+  end
 end

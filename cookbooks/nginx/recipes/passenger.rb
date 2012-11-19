@@ -32,6 +32,7 @@ node.default["nginx"]["passenger"]["version"] = "3.0.18"
 node.default["nginx"]["passenger"]["root"] = "/usr/lib/ruby/gems/1.8/gems/passenger-3.0.18"
 node.default["nginx"]["passenger"]["ruby"] = %x{which ruby}.chomp
 node.default["nginx"]["passenger"]["max_pool_size"] = 10
+node.default["nginx"]["passenger"]["sites"] = []
 
 service "nginx" do
   supports :status => true, :restart => true, :reload => true
@@ -67,3 +68,14 @@ end
 node.run_state[:nginx_configure_flags] =
   node.run_state[:nginx_configure_flags] | ["--add-module=#{node["nginx"]["passenger"]["root"]}/ext/nginx"]
 
+node[:nginx][:passenger][:sites].each do |site|
+  template "/etc/nginx/sites-available/#{site[:sitename]}" do
+    source "passenger_site.erb"
+    mode 0644
+    variables(
+      :sitename =>    site[:sitename],
+      :deploy_path => site[:deploy_path],
+      :domains =>     site[:domains],
+    )
+  end
+end

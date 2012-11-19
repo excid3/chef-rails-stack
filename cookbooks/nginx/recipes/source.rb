@@ -184,6 +184,11 @@ cookbook_file "#{node['nginx']['dir']}/mime.types" do
   notifies :reload, 'service[nginx]', :immediately
 end
 
+if node[:nginx][:passenger]
+  system "ln -s /var/lib/gems/1.9.1/gems/passenger-#{node[:nginx][:passenger][:version]}/ /usr/lib/phusion-passenger"
+  system "ln -s /var/lib/gems/1.9.1/gems/passenger-#{node[:nginx][:passenger][:version]}/ /usr/share/phusion-passenger"
+end
+
 service "nginx" do
   action :start
 end

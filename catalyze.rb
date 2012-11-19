@@ -2,6 +2,11 @@
 
 require 'optparse'
 
+def command?(name)
+  `which #{name}`
+  $?.success?
+end
+
 def run_command(command)
   success = system(command)
   if not success
@@ -21,6 +26,9 @@ end.parse!
 ip_address = ARGV.shift
 
 if options[:initialize]
+  if command?("ssh-copy-id")
+    run_command "ssh-copy-id root@#{ip_address}"
+  end
   puts "Initializing server for chef-solo..."
   run_command "ssh root@#{ip_address} 'bash -s' < setup.sh"
   puts "Finished initializing!"
